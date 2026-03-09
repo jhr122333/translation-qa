@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "title": "GMP 세척 검증 SOP",
+    "direction": "ko→en",
+    "category": "GMP/Quality",
+    "errorDesc": "용어 불일치: SOP→work instruction, Deviation→problem, CAPA→corrective measures",
+    "source": "본 표준작업절차서는 제조 설비의 세척 검증 절차를 규정한다. 세척 완료 후 잔류물 한도치를 초과하는 경우, 일탈 보고서를 작성하고 CAPA를 수립하여야 한다.",
+    "good": "This Standard Operating Procedure (SOP) defines the cleaning validation procedures for manufacturing equipment. If residue limits are exceeded after cleaning, a Deviation report must be prepared and a Corrective and Preventive Action (CAPA) plan must be established.",
+    "bad": "This work instruction defines the verification process for washing manufacturing facilities. If residue limits are exceeded after washing, a problem report must be written and corrective measures should be set up."
+  },
+  {
+    "id": 2,
+    "title": "임상시험 동의서",
+    "direction": "en→ko",
+    "category": "Clinical Trial",
+    "errorDesc": "자연성 문제: 비격식체 사용, SAE 오역(부작용), 규제기관 표현 부적절",
+    "source": "Participation in this clinical trial is entirely voluntary. You may withdraw your consent at any time without penalty. All serious adverse events will be reported to the regulatory authority within 15 days.",
+    "good": "본 임상시험 참여는 전적으로 자발적입니다. 귀하는 불이익 없이 언제든지 동의를 철회할 수 있습니다. 모든 중대한 이상반응(SAE)은 15일 이내에 규제 당국에 보고됩니다.",
+    "bad": "이 임상 실험에 참가하는 것은 완전히 자유입니다. 당신은 벌칙 없이 아무 때나 동의를 취소할 수 있어요. 모든 심각한 부작용은 15일 안에 정부 기관에 알려질 것입니다."
+  },
+  {
+    "id": 3,
+    "title": "CAPA 보고서",
+    "direction": "ko→en",
+    "category": "GMP/Quality",
+    "errorDesc": "정확성 문제: Deviation 미표기, 근본원인 분석 축약, CAPA 시정/예방 구조 미반영",
+    "source": "이번 일탈은 제조 공정 중 온도 모니터링 시스템 오작동으로 인해 발생하였다. 근본 원인 분석 결과, 센서 교정 주기가 부적절하였음을 확인하였다. 시정조치로 교정 주기를 월 1회로 변경하고, 예방조치로 이중 모니터링 시스템을 도입한다.",
+    "good": "This Deviation occurred due to a malfunction of the temperature monitoring system during the manufacturing process. Root cause analysis identified that the sensor calibration interval was inadequate. As a corrective action, the calibration interval will be changed to monthly. As a preventive action, a dual monitoring system will be introduced.",
+    "bad": "This issue happened because the temperature system broke down during manufacturing. Investigation found the sensor was not calibrated often enough. We will calibrate more frequently and add another monitoring system to prevent recurrence."
+  }
+]

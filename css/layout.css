@@ -1,0 +1,181 @@
+/* ── 공통 컨테이너 ── */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+
+/* ── 랜딩 네비 ── */
+.nav {
+  background: var(--color-primary);
+  padding: 1rem 0;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 12px rgba(27,67,50,.18);
+}
+.nav-inner { display: flex; align-items: center; justify-content: space-between; }
+.nav-logo {
+  font-family: var(--font-serif);
+  font-size: 1.1rem; font-weight: 700;
+  color: #fff; letter-spacing: .02em;
+}
+.nav-logo span { color: var(--color-primary-light); }
+
+/* ── 히어로 ── */
+.hero { padding: 6rem 0 4.5rem; text-align: center; }
+.hero-tag {
+  display: inline-block;
+  font-size: .75rem; font-weight: 600;
+  letter-spacing: .18em; text-transform: uppercase;
+  color: var(--color-accent);
+  border: 1px solid var(--color-border-dark);
+  padding: .3rem .9rem; border-radius: 999px;
+  margin-bottom: 1.5rem;
+}
+.hero h1 { font-size: 3rem; margin-bottom: 1rem; line-height: 1.15; }
+.hero-sub {
+  font-size: 1.0625rem; color: var(--color-text-secondary);
+  max-width: 540px; margin: 0 auto 2.5rem;
+}
+
+/* ── 워크플로우 섹션 ── */
+.workflow { padding: 4rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border); }
+.workflow-title { text-align: center; margin-bottom: .5rem; }
+.workflow-sub  { text-align: center; color: var(--color-text-secondary); font-size: .9375rem; margin-bottom: 2.5rem; }
+
+.workflow-steps {
+  display: flex; align-items: stretch; gap: 0;
+  max-width: 820px; margin: 0 auto;
+}
+.workflow-step {
+  flex: 1;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.75rem 1.5rem;
+  text-align: center;
+  position: relative;
+}
+.workflow-step + .workflow-step { margin-left: 0; }
+.workflow-arrow {
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 .5rem; color: var(--color-primary-light); font-size: 1.5rem;
+  flex-shrink: 0;
+}
+.workflow-num {
+  width: 2rem; height: 2rem;
+  background: var(--color-primary); color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .8rem; font-weight: 700;
+  margin: 0 auto .75rem;
+}
+.workflow-step h4 { color: var(--color-primary); margin-bottom: .5rem; }
+.workflow-step p  { font-size: .8375rem; color: var(--color-text-secondary); line-height: 1.55; }
+
+/* ── 특징 섹션 ── */
+.features {
+  padding: 4rem 0 5rem;
+  border-top: 1px solid var(--color-border);
+}
+.features-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; margin-top: 2.5rem;
+}
+.feature-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 2rem 1.5rem; text-align: center;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow .2s, transform .2s;
+}
+.feature-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+.feature-icon { font-size: 2rem; margin-bottom: .75rem; }
+.feature-card h3 { font-size: 1rem; margin-bottom: .5rem; }
+.feature-card p  { font-size: .875rem; color: var(--color-text-secondary); }
+
+/* ── 앱 헤더 ── */
+.app-header {
+  background: var(--color-primary);
+  padding: .875rem 0;
+  box-shadow: 0 2px 10px rgba(27,67,50,.2);
+}
+.app-header-inner {
+  display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;
+}
+.app-logo { font-family: var(--font-serif); font-size: 1rem; font-weight: 700; color: #fff; white-space: nowrap; flex-shrink: 0; }
+.app-logo span { color: var(--color-primary-light); }
+.app-logo-badge {
+  display: inline-block; font-family: var(--font-sans);
+  font-size: .65rem; font-weight: 600; letter-spacing: .06em;
+  background: var(--color-primary-light); color: var(--color-primary);
+  padding: .1rem .45rem; border-radius: 999px; margin-left: .4rem;
+  vertical-align: middle;
+}
+.api-key-group { display: flex; align-items: center; gap: .5rem; flex: 1; min-width: 0; }
+.api-key-group label { color: rgba(255,255,255,.7); font-size: .8rem; white-space: nowrap; }
+.api-key-group input {
+  flex: 1; min-width: 0;
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.25);
+  border-radius: var(--radius-sm); padding: .45rem .75rem;
+  color: #fff; font-size: .875rem; outline: none;
+  transition: border-color .2s;
+}
+.api-key-group input::placeholder { color: rgba(255,255,255,.45); }
+.api-key-group input:focus { border-color: var(--color-primary-light); }
+
+/* ── 탭 네비 ── */
+.tabs-nav {
+  background: var(--color-surface);
+  border-bottom: 2px solid var(--color-border);
+  position: sticky; top: 54px; z-index: 90;
+}
+.tabs-nav-inner { display: flex; }
+.tab-btn {
+  background: none; border: none;
+  border-bottom: 3px solid transparent; margin-bottom: -2px;
+  padding: .9rem 1.5rem;
+  font-family: var(--font-sans); font-size: .9375rem; font-weight: 500;
+  color: var(--color-text-muted); cursor: pointer;
+  transition: color .2s, border-color .2s;
+  white-space: nowrap;
+}
+.tab-btn:hover { color: var(--color-primary-mid); }
+.tab-btn.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeIn .2s ease; }
+
+/* ── 2컬럼 레이아웃 ── */
+.two-col {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1.5rem; padding: 2rem 0; align-items: start;
+}
+
+/* ── 용어집 레이아웃 ── */
+.glossary-layout { padding: 2rem 0; }
+.glossary-toolbar { display: flex; align-items: center; gap: .875rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+
+/* ── 샘플 그리드 ── */
+.samples-layout { padding: 2rem 0; }
+.samples-header { margin-bottom: 1.75rem; }
+.samples-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+
+/* ── 섹션 공통 타이틀 ── */
+.section-center { text-align: center; }
+
+/* ── 푸터 ── */
+.footer {
+  text-align: center; padding: 2rem 0;
+  font-size: .875rem; color: var(--color-text-muted);
+  border-top: 1px solid var(--color-border); margin-top: 3rem;
+}
+
+/* ── 반응형 ── */
+@media (max-width: 768px) {
+  .hero h1 { font-size: 1.875rem; }
+  .workflow-steps { flex-direction: column; }
+  .workflow-arrow { transform: rotate(90deg); padding: .25rem 0; align-self: center; }
+  .features-grid { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+  .samples-grid { grid-template-columns: 1fr; }
+  .app-header-inner { flex-direction: column; align-items: flex-start; gap: .75rem; }
+  .api-key-group { width: 100%; }
+  .tabs-nav-inner { overflow-x: auto; }
+  .tab-btn { padding: .875rem 1rem; font-size: .875rem; }
+}

@@ -1,0 +1,23 @@
+[
+  { "id": "g001", "category": "GMP/Quality", "ko": "표준작업절차서", "en": "Standard Operating Procedure", "abbr": "SOP", "editable": false },
+  { "id": "g002", "category": "GMP/Quality", "ko": "우수의약품제조관리기준", "en": "Good Manufacturing Practice", "abbr": "GMP", "editable": false },
+  { "id": "g003", "category": "GMP/Quality", "ko": "시정 및 예방조치", "en": "Corrective and Preventive Action", "abbr": "CAPA", "editable": false },
+  { "id": "g004", "category": "GMP/Quality", "ko": "일탈", "en": "Deviation", "abbr": "", "editable": false },
+  { "id": "g005", "category": "GMP/Quality", "ko": "밸리데이션", "en": "Validation", "abbr": "", "editable": false },
+  { "id": "g006", "category": "GMP/Quality", "ko": "세척 검증", "en": "Cleaning Validation", "abbr": "", "editable": false },
+  { "id": "g007", "category": "GMP/Quality", "ko": "배치 기록서", "en": "Batch Record", "abbr": "", "editable": false },
+  { "id": "g008", "category": "GMP/Quality", "ko": "품질보증", "en": "Quality Assurance", "abbr": "QA", "editable": false },
+  { "id": "g009", "category": "Clinical Trial", "ko": "임상시험", "en": "Clinical Trial", "abbr": "", "editable": false },
+  { "id": "g010", "category": "Clinical Trial", "ko": "임상시험 대상자", "en": "Clinical Trial Subject", "abbr": "", "editable": false },
+  { "id": "g011", "category": "Clinical Trial", "ko": "동의서", "en": "Informed Consent Form", "abbr": "ICF", "editable": false },
+  { "id": "g012", "category": "Clinical Trial", "ko": "이상반응", "en": "Adverse Event", "abbr": "AE", "editable": false },
+  { "id": "g013", "category": "Clinical Trial", "ko": "중대한 이상반응", "en": "Serious Adverse Event", "abbr": "SAE", "editable": false },
+  { "id": "g014", "category": "Clinical Trial", "ko": "임상시험계획서", "en": "Clinical Trial Protocol", "abbr": "", "editable": false },
+  { "id": "g015", "category": "Regulatory", "ko": "식품의약품안전처", "en": "Ministry of Food and Drug Safety", "abbr": "MFDS", "editable": false },
+  { "id": "g016", "category": "Regulatory", "ko": "의약품 허가", "en": "Marketing Authorization", "abbr": "", "editable": false },
+  { "id": "g017", "category": "Regulatory", "ko": "규제 제출물", "en": "Regulatory Submission", "abbr": "", "editable": false },
+  { "id": "g018", "category": "Regulatory", "ko": "품목허가", "en": "Product Approval", "abbr": "", "editable": false },
+  { "id": "g019", "category": "Pharmacovigilance", "ko": "약물감시", "en": "Pharmacovigilance", "abbr": "PV", "editable": false },
+  { "id": "g020", "category": "Pharmacovigilance", "ko": "위해성 관리 계획", "en": "Risk Management Plan", "abbr": "RMP", "editable": false },
+  { "id": "g021", "category": "Pharmacovigilance", "ko": "정기적 안전성 최신 보고서", "en": "Periodic Safety Update Report", "abbr": "PSUR", "editable": false }
+]
