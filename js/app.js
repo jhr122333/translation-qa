@@ -100,11 +100,24 @@ function toggleDemoMode() {
   let banner = document.getElementById("demoBanner");
 
   if (isDemoMode) {
+    // API 키 영역 숨기고 데모 뱃지로 교체
+    group.style.display = "none";
+    let demoBadge = document.getElementById("demoBadge");
+    if (!demoBadge) {
+      demoBadge = document.createElement("div");
+      demoBadge.id = "demoBadge";
+      demoBadge.style.cssText = `
+        background: var(--color-primary-light); color: var(--color-primary);
+        padding: .3rem .9rem; border-radius: 999px;
+        font-size: .8rem; font-weight: 700; flex-shrink: 0;
+      `;
+      demoBadge.textContent = "🎭 데모 모드 실행 중";
+      group.insertAdjacentElement("afterend", demoBadge);
+    }
+
     // 버튼 상태 변경
     btn.textContent = "✕ 데모 종료";
     btn.style.background = "rgba(255,255,255,.3)";
-    group.style.opacity = ".35";
-    group.style.pointerEvents = "none";
 
     // 상단 배너 삽입
     if (!banner) {
@@ -132,8 +145,8 @@ function toggleDemoMode() {
   } else {
     btn.textContent = "🎭 데모 모드";
     btn.style.background = "rgba(255,255,255,.15)";
-    group.style.opacity = "";
-    group.style.pointerEvents = "";
+    group.style.display = "";
+    document.getElementById("demoBadge")?.remove();
     banner?.remove();
     showToast("데모 모드 종료.");
   }
