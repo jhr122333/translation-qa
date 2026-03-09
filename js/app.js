@@ -1,5 +1,5 @@
 import { runTranslation, runEvaluation } from './evaluator.js';
-import { loadGlossary, addTerm, deleteTerm } from './glossary.js';
+import { loadGlossary, addTerm, deleteTerm, detectUsedTerms } from './glossary.js';
 
 // ── 전역 상태 ──────────────────────────────────────────────
 let baseGlossary = [];
@@ -7,13 +7,34 @@ let samples = [];
 let translateDirection = "ko→en";
 let qaDirection = "ko→en";
 let currentGlossaryCat = "전체";
-let lastTranslateResult = null; // { sourceText, translatedText, direction }
+let isDemoMode = false;
+
+// ── 데모 mock 데이터 ───────────────────────────────────────
+const DEMO_TRANSLATION = `This Standard Operating Procedure (SOP) defines the cleaning validation procedures for manufacturing equipment. If residue limits are exceeded after cleaning, a Deviation report must be prepared and a Corrective and Preventive Action (CAPA) plan must be established.`;
+
+const DEMO_QA = {
+  good: {
+    accuracy: { score: 5, comment: "원문의 모든 내용이 빠짐없이 정확하게 번역되었습니다. 표준작업절차서, 일탈, CAPA 등 핵심 용어가 원문 의미를 완전히 반영하였습니다." },
+    fluency:  { score: 4, comment: "번역문이 영어 규제 문서에 적합한 격식체로 자연스럽게 표현되었습니다. 전반적으로 가독성이 높고 문장 구조가 명확합니다." },
+    adequacy: { score: 5, comment: "SOP, Deviation, CAPA 등 용어집의 전문 용어가 정확하게 사용되었습니다. 약어 병기(SOP, CAPA) 처리가 GMP 문서 관례에 부합합니다." },
+    overall: "번역문은 원문의 의미를 정확하고 자연스럽게 전달하고 있습니다. 용어집 기반 전문 용어가 일관되게 적용되어 규제 문서로서 신뢰성이 높습니다. 전반적으로 GMP 규제 제출용 번역으로 즉시 활용 가능한 수준입니다.",
+    suggestion: "전반적으로 번역 품질이 우수합니다."
+  },
+  bad: {
+    accuracy: { score: 2, comment: "표준작업절차서(SOP)가 'work instruction'으로 잘못 번역되어 원문 의미가 변질되었습니다. 일탈(Deviation)이 'problem'으로 표현되어 규제 맥락에서 심각한 오류입니다." },
+    fluency:  { score: 3, comment: "문장 자체의 영어 표현은 어색하지 않으나, GMP 규제 문서에 적합한 격식체가 충분히 반영되지 않았습니다. 'should be set up' 등의 표현은 규제 문서에 부적합합니다." },
+    adequacy: { score: 1, comment: "SOP, Deviation, CAPA 등 필수 전문 용어가 모두 부정확하게 번역되었습니다. 용어집 기준 세 항목 모두 불일치하여 규제 제출 시 거부 사유가 될 수 있습니다." },
+    overall: "번역문에 SOP→work instruction, Deviation→problem, CAPA→corrective measures 등 심각한 용어 불일치가 발견되었습니다. 전문 용어의 일관성이 결여되어 GMP 규제 문서로 사용하기 어렵습니다. 용어집 기반으로 전면 재번역이 권고됩니다.",
+    suggestion: "This Standard Operating Procedure (SOP) defines the cleaning validation procedures for manufacturing equipment. If residue limits are exceeded after cleaning, a Deviation report must be prepared and a Corrective and Preventive Action (CAPA) plan must be established."
+  }
+};
 
 // ── 초기화 ────────────────────────────────────────────────
 async function init() {
   await loadBaseData();
   restoreApiKey();
   setupTabs();
+  setupDemoMode();
   setupTranslateTab();
   setupQATab();
   setupGlossaryTab();
@@ -56,15 +77,68 @@ function getApiKey() {
 }
 
 function syncButtons() {
-  const hasKey = !!getApiKey();
+  const active = isDemoMode || !!getApiKey();
   ["translateBtn", "qaBtn"].forEach(id => {
     const btn = document.getElementById(id);
-    if (btn) btn.disabled = !hasKey;
+    if (btn) btn.disabled = !active;
   });
-  const tip = document.getElementById("translateTip");
+  const tip  = document.getElementById("translateTip");
   const tip2 = document.getElementById("qaTip");
-  if (tip) tip.style.display = hasKey ? "none" : "";
-  if (tip2) tip2.style.display = hasKey ? "none" : "";
+  if (tip)  tip.style.display  = active ? "none" : "";
+  if (tip2) tip2.style.display = active ? "none" : "";
+}
+
+// ── 데모 모드 ─────────────────────────────────────────────
+function setupDemoMode() {
+  document.getElementById("demoModeBtn").addEventListener("click", toggleDemoMode);
+}
+
+function toggleDemoMode() {
+  isDemoMode = !isDemoMode;
+  const btn = document.getElementById("demoModeBtn");
+  const group = document.getElementById("apiKeyGroup");
+  let banner = document.getElementById("demoBanner");
+
+  if (isDemoMode) {
+    // 버튼 상태 변경
+    btn.textContent = "✕ 데모 종료";
+    btn.style.background = "rgba(255,255,255,.3)";
+    group.style.opacity = ".35";
+    group.style.pointerEvents = "none";
+
+    // 상단 배너 삽입
+    if (!banner) {
+      banner = document.createElement("div");
+      banner.id = "demoBanner";
+      banner.style.cssText = `
+        background: var(--color-primary-light); color: var(--color-primary);
+        text-align: center; padding: .5rem 1rem; font-size: .875rem; font-weight: 600;
+        position: sticky; top: 54px; z-index: 89;
+      `;
+      banner.innerHTML = "🎭 데모 모드 — API 키 없이 샘플 번역·평가 결과를 체험합니다";
+      document.querySelector(".tabs-nav").insertAdjacentElement("afterend", banner);
+    }
+
+    // 샘플 1 원문 자동 로드
+    const s = samples[0];
+    document.getElementById("translateSource").value = s.source;
+    document.getElementById("translateCharCount").textContent = `${s.source.length}자`;
+    translateDirection = s.direction;
+    document.querySelectorAll("#tab-translate .toggle-btn").forEach(b => {
+      b.classList.toggle("active", b.dataset.dir === s.direction);
+    });
+    switchTab("tab-translate");
+    showToast("데모 모드 시작! 번역 실행을 눌러보세요.");
+  } else {
+    btn.textContent = "🎭 데모 모드";
+    btn.style.background = "rgba(255,255,255,.15)";
+    group.style.opacity = "";
+    group.style.pointerEvents = "";
+    banner?.remove();
+    showToast("데모 모드 종료.");
+  }
+
+  syncButtons();
 }
 
 // ── 탭 제어 ────────────────────────────────────────────────
@@ -81,7 +155,6 @@ function switchTab(tabId) {
 
 // ── 탭 1: 번역 ────────────────────────────────────────────
 function setupTranslateTab() {
-  // 방향 토글
   document.querySelectorAll("#tab-translate .toggle-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       document.querySelectorAll("#tab-translate .toggle-btn").forEach(b => b.classList.remove("active"));
@@ -90,20 +163,16 @@ function setupTranslateTab() {
     });
   });
 
-  // 글자 수 카운터
   const srcTA = document.getElementById("translateSource");
   srcTA.addEventListener("input", () => {
     document.getElementById("translateCharCount").textContent = `${srcTA.value.length}자`;
   });
 
-  // 번역 실행
   document.getElementById("translateBtn").addEventListener("click", doTranslate);
 }
 
 async function doTranslate() {
-  const apiKey = getApiKey();
   const sourceText = document.getElementById("translateSource").value.trim();
-  if (!apiKey) { showToast("API Key를 입력해 주세요.", true); return; }
   if (!sourceText) { showToast("원문을 입력해 주세요.", true); return; }
 
   setLoading("translateBtn", true, "번역 중...");
@@ -111,10 +180,22 @@ async function doTranslate() {
     <div class="result-empty"><div class="result-empty-icon">⏳</div><p>번역 중입니다...</p></div>`;
 
   try {
-    const { translatedText, usedTerms } = await runTranslation({
-      apiKey, sourceText, direction: translateDirection, baseGlossary
-    });
-    lastTranslateResult = { sourceText, translatedText, direction: translateDirection };
+    let translatedText, usedTerms;
+
+    if (isDemoMode) {
+      // 데모: 1.5초 딜레이 후 mock 결과 반환
+      await delay(1500);
+      translatedText = DEMO_TRANSLATION;
+      const glossary = loadGlossary(baseGlossary);
+      usedTerms = detectUsedTerms(translatedText, translateDirection, glossary);
+    } else {
+      const apiKey = getApiKey();
+      if (!apiKey) { showToast("API Key를 입력해 주세요.", true); return; }
+      ({ translatedText, usedTerms } = await runTranslation({
+        apiKey, sourceText, direction: translateDirection, baseGlossary
+      }));
+    }
+
     renderTranslateResult(translatedText, usedTerms, sourceText);
   } catch (err) {
     showToast("번역 오류: " + err.message, true);
@@ -133,8 +214,12 @@ function renderTranslateResult(translatedText, usedTerms, sourceText) {
        ).join('')}</div>`
     : '';
 
+  const demoTag = isDemoMode
+    ? `<div style="font-size:.75rem;color:var(--color-text-muted);margin-bottom:.5rem;">🎭 데모 결과</div>` : '';
+
   document.getElementById("translateResultPanel").innerHTML = `
     <div class="panel-title">번역 결과</div>
+    ${demoTag}
     ${badgesHtml}
     <div class="translate-result-box" id="translateOutput" contenteditable="true">${escHtml(translatedText)}</div>
     <div class="btn-row">
@@ -164,13 +249,9 @@ function sendToQA(sourceText, translatedText, direction) {
 
 // ── 탭 2: QA 평가 ─────────────────────────────────────────
 function setupQATab() {
-  // 방향 토글
   document.querySelectorAll("#tab-qa .toggle-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      setQADirection(btn.dataset.dir);
-    });
+    btn.addEventListener("click", () => setQADirection(btn.dataset.dir));
   });
-
   document.getElementById("qaBtn").addEventListener("click", doEvaluate);
 }
 
@@ -182,10 +263,8 @@ function setQADirection(dir) {
 }
 
 async function doEvaluate() {
-  const apiKey = getApiKey();
   const sourceText = document.getElementById("qaSource").value.trim();
   const targetText = document.getElementById("qaTarget").value.trim();
-  if (!apiKey) { showToast("API Key를 입력해 주세요.", true); return; }
   if (!sourceText || !targetText) { showToast("원문과 번역문을 모두 입력해 주세요.", true); return; }
 
   setLoading("qaBtn", true, "평가 중...");
@@ -193,9 +272,24 @@ async function doEvaluate() {
     <div class="result-empty"><div class="result-empty-icon">⏳</div><p>평가 중입니다...</p></div>`;
 
   try {
-    const result = await runEvaluation({
-      apiKey, sourceText, targetText, direction: qaDirection, baseGlossary
-    });
+    let result;
+
+    if (isDemoMode) {
+      await delay(2000);
+      // 나쁜 번역 키워드가 포함되면 bad mock, 아니면 good mock
+      const isBad = targetText.includes("work instruction") || targetText.includes("problem report") || targetText.includes("corrective measures")
+        || targetText.includes("자유입니다") || targetText.includes("취소할 수 있어요") || targetText.includes("부작용");
+      const mock = isBad ? DEMO_QA.bad : DEMO_QA.good;
+      const glossary = loadGlossary(baseGlossary);
+      const { detectMismatches } = await import('./glossary.js');
+      const mismatches = detectMismatches(sourceText, targetText, qaDirection, glossary);
+      result = { ...mock, mismatches };
+    } else {
+      const apiKey = getApiKey();
+      if (!apiKey) { showToast("API Key를 입력해 주세요.", true); return; }
+      result = await runEvaluation({ apiKey, sourceText, targetText, direction: qaDirection, baseGlossary });
+    }
+
     renderQAResult(result);
   } catch (err) {
     showToast("평가 오류: " + err.message, true);
@@ -244,8 +338,12 @@ function renderQAResult(result) {
       </table>
     </div>` : '';
 
+  const demoTag = isDemoMode
+    ? `<div style="font-size:.75rem;color:var(--color-text-muted);margin-bottom:.75rem;">🎭 데모 결과</div>` : '';
+
   document.getElementById("qaResultPanel").innerHTML = `
     <div class="panel-title">평가 결과</div>
+    ${demoTag}
     <div class="score-list">${scoresHtml}</div>
     ${mismatchHtml}
     <div class="result-box-label">종합 평가</div>
@@ -389,7 +487,6 @@ function setupSamplesTab() {
 function loadSampleToTranslate(sample) {
   document.getElementById("translateSource").value = sample.source;
   document.getElementById("translateCharCount").textContent = `${sample.source.length}자`;
-  // 방향 토글 동기화
   translateDirection = sample.direction;
   document.querySelectorAll("#tab-translate .toggle-btn").forEach(b => {
     b.classList.toggle("active", b.dataset.dir === sample.direction);
@@ -407,6 +504,10 @@ async function loadSampleToQA(sample, type) {
 }
 
 // ── 유틸 ───────────────────────────────────────────────────
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function setLoading(btnId, loading, loadingText) {
   const btn = document.getElementById(btnId);
   if (!btn) return;
@@ -416,7 +517,7 @@ function setLoading(btnId, loading, loadingText) {
     btn.disabled = true;
   } else {
     btn.innerHTML = btn.dataset.origText || loadingText;
-    btn.disabled = !getApiKey();
+    btn.disabled = !(isDemoMode || getApiKey());
   }
 }
 
