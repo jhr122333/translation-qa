@@ -40,6 +40,11 @@ async function init() {
   setupGlossaryTab();
   setupSamplesTab();
   syncButtons();
+
+  // API 키가 없으면 자동으로 데모 모드 시작 (포트폴리오 방문자 UX)
+  if (!getApiKey()) {
+    toggleDemoMode();
+  }
 }
 
 async function loadBaseData() {
