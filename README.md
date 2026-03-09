@@ -17,20 +17,3 @@
 ## 기술 스택
 
 Vanilla JS (ES Modules) · Claude API (claude-opus-4-5) · GitHub Pages
-
-## 로컬 실행
-
-ES Modules 사용으로 `file://` 직접 실행 불가. 로컬 서버 필요:
-
-```bash
-python3 -m http.server 8082
-# http://localhost:8082/translation-qa/ 접속
-```
-
-또는 VS Code Live Server 확장 사용.
-
-## GitHub Pages 배포
-
-1. `translation-qa` 레포 생성 후 push
-2. Settings → Pages → Deploy from branch → main / root
-3. `https://<username>.github.io/translation-qa/`
