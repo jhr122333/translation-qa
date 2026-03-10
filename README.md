@@ -36,10 +36,10 @@
 
 ## 핵심 기능
 
-### 🔤 용어집 기반 번역
-- GMP / Clinical Trial / Regulatory / Pharmacovigilance 4개 카테고리, 21개 용어 내장
-- 번역 시 용어집 자동 참조 → 일관된 도메인 용어 사용 보장
-- 번역 완료 후 사용된 용어 뱃지로 시각적 확인
+### 🔤 RAG 기반 번역
+- GMP / Clinical Trial / Regulatory / Pharmacovigilance / Manufacturing / Analytical 6개 카테고리, **80개 용어** 내장
+- **TF-IDF 기반 RAG(Retrieval-Augmented Generation)**: 원문과 의미적으로 가장 관련된 용어 상위 15개만 선별해 프롬프트에 주입 → 전체 용어 주입 대비 정확도 향상·토큰 절감
+- 번역 완료 후 RAG 관련도 점수(%) 배지로 시각적 확인
 
 ### 📊 번역학 3축 품질 평가
 - **정확성 (Accuracy)**: 의미 손실·왜곡 여부
@@ -51,9 +51,15 @@
 - 원문에 등장한 용어집 용어가 번역문에 올바르게 반영됐는지 자동 체크
 - ✓ / ✗ 테이블로 시각적 표시
 
-### 📚 용어집 관리
-- 기본 21개 용어 조회 및 카테고리 필터
-- 커스텀 용어 추가 / 삭제 (localStorage 저장)
+### 📚 용어집 관리 (확장 스키마)
+- 용어별 `definition`(한글 정의) · `context`(사용 맥락) · `relatedTerms`(연관 ID) · `source`(ICH/FDA/EMA 출처) 필드 추가
+- 커스텀 용어 추가 / 삭제 (localStorage 저장), 행 클릭 시 상세 사이드패널 열람
+
+### 🤖 자동 용어 후보 추출
+- 번역 결과에서 미등록 전문용어 자동 감지 (규칙 기반 패턴)
+  - 괄호 약어 쌍 `Term (ABBR)` → 신뢰도 90%
+  - 대문자 명사구 → 70%, 단독 약어 → 60%
+- 감지된 후보를 한 클릭으로 용어집에 추가
 
 ### 🧪 샘플 데모
 GMP SOP, 임상시험 동의서, CAPA 보고서 3개 샘플 제공.
@@ -67,6 +73,8 @@ GMP SOP, 임상시험 동의서, CAPA 보고서 3개 샘플 제공.
 |------|------|
 | Frontend | Vanilla JS (ES Modules), HTML/CSS |
 | AI API | Claude API (`claude-opus-4-5`) |
+| RAG 엔진 | TF-IDF (브라우저 전용, 백엔드 없음) |
+| 개발 방식 | **4개 AI 서브에이전트 병렬 협업** |
 | 배포 | GitHub Pages |
 | 빌드 | 없음 (Zero Build) |
 
@@ -86,6 +94,21 @@ python -m http.server 8080
 ```
 
 API Key는 앱 상단 입력란에 Anthropic API Key 입력 후 사용.
+
+---
+
+## AI 에이전트 아키텍처
+
+이 프로젝트의 v2 업그레이드는 **4개의 AI 서브에이전트를 병렬로 실행**하여 구현했습니다.
+
+| 에이전트 | 역할 | 산출물 |
+|---------|------|--------|
+| **Agent 1 — DB** | 용어집 DB 설계 및 데이터 확충 | `data/glossary.json` (21개 → 80개, 스키마 확장) |
+| **Agent 2 — RAG** | TF-IDF 기반 RAG 엔진 구현 | `js/rag.js` (신규), `js/api.js` (수정) |
+| **Agent 3 — UI** | RAG 배지·사이드패널·관련도 컬럼 UI | `app.html`, `css/components.css`, `js/app.js` |
+| **Agent 4 — 자동추출** | 번역 결과에서 미등록 용어 후보 자동 감지 | `js/termExtractor.js` (신규) |
+
+각 에이전트는 독립적으로 파일을 생성·수정하고, 결과를 통합하는 방식으로 협업했습니다.
 
 ---
 
