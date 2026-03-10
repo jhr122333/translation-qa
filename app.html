@@ -87,54 +87,52 @@
   </div>
 
   <!-- ══════════════════════════════════════════════
-       탭 2: QA 평가
+       탭 2: QA 평가 (Side-by-Side Editor)
   ══════════════════════════════════════════════ -->
   <div class="tab-content" id="tab-qa">
     <div class="container">
-      <div class="two-col">
-
-        <!-- 왼쪽: 입력 -->
-        <div class="card">
-          <div class="panel-title">평가 입력</div>
-
-          <div class="info-box">
-            💡 번역 탭에서 <strong>📊 QA 평가하기</strong> 버튼을 누르면 자동으로 채워집니다.
-          </div>
-
-          <div class="form-group">
-            <div class="form-label">번역 방향</div>
-            <div class="direction-toggle">
-              <button class="toggle-btn active" data-dir="ko→en">한 → 영</button>
-              <button class="toggle-btn" data-dir="en→ko">영 → 한</button>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="qaSource">원문</label>
-            <textarea class="form-textarea" id="qaSource" rows="5"
-              placeholder="원문을 입력하세요..."></textarea>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="qaTarget">번역문</label>
-            <textarea class="form-textarea" id="qaTarget" rows="5"
-              placeholder="평가할 번역문을 입력하세요..."></textarea>
-          </div>
-
-          <div class="tooltip-wrap">
-            <button class="btn btn-primary btn-full" id="qaBtn" disabled>평가 시작</button>
-            <span class="tooltip" id="qaTip">API Key를 먼저 입력해 주세요.</span>
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
+          <div>MQM 리뷰 에디터</div>
+          <div class="direction-toggle" style="width:200px;">
+            <button class="toggle-btn active" data-dir="ko→en">한 → 영</button>
+            <button class="toggle-btn" data-dir="en→ko">영 → 한</button>
           </div>
         </div>
-
-        <!-- 오른쪽: 결과 -->
-        <div class="card" id="qaResultPanel">
-          <div class="result-empty">
-            <div class="result-empty-icon">📊</div>
-            <p>평가 결과가 여기에 표시됩니다</p>
-          </div>
+        
+        <div class="info-box">
+          💡 번역 탭에서 <strong>📊 QA 평가하기</strong> 버튼을 누르거나, 샘플 데모에서 원문/번역문 쌍을 가져올 수 있습니다.
         </div>
 
+        <div class="tooltip-wrap" style="max-width: 300px; margin-bottom: 1.5rem;">
+          <button class="btn btn-primary btn-full" id="qaBtn" disabled>▶ MQM 품질 평가 시작</button>
+          <span class="tooltip" id="qaTip">API Key를 먼저 입력해 주세요.</span>
+        </div>
+
+        <!-- Side-by-Side 리뷰 테이블 -->
+        <div class="qa-table-wrap">
+          <table class="qa-table">
+            <thead>
+              <tr>
+                <th style="width: 45%;">원문 (Source)</th>
+                <th style="width: 45%;">번역문 (Target)</th>
+                <th style="width: 10%;">QA 결과 (MQM)</th>
+              </tr>
+            </thead>
+            <tbody id="qaResultTbody">
+              <tr>
+                <td colspan="3" class="result-empty" style="min-height: 150px; padding: 2rem;">
+                  <div class="result-empty-icon">📊</div>
+                  <p>이곳에 분절된 문장이 나란히 표시되고 평가 결과가 렌더링됩니다.</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="margin-top: 1rem; text-align: right;">
+          <button class="btn btn-secondary btn-sm" id="copyQABtn" style="display:none;">최종 결과 복사</button>
+        </div>
       </div>
     </div>
   </div>
@@ -156,20 +154,83 @@
             <button class="cat-btn" data-cat="Pharmacovigilance">Pharmacovigilance</button>
             <button class="cat-btn" data-cat="사용자 정의">사용자 정의</button>
           </div>
-          <input class="search-input" type="text" id="glossarySearch" placeholder="용어 검색...">
+          <div class="glossary-search-group">
+            <input class="search-input" type="text" id="glossarySearch" placeholder="용어 검색...">
+            <button class="rag-toggle-btn" id="ragToggleBtn" title="RAG 시맨틱 검색 모드 전환">
+              <span class="rag-toggle-icon">🔍</span> RAG 시맨틱 검색
+            </button>
+            <span class="rag-search-indicator" id="ragSearchIndicator">
+              <span class="spinner" style="border-top-color:var(--color-rag);border-color:rgba(99,102,241,.2);width:.8em;height:.8em;"></span>
+              시맨틱 검색 중...
+            </span>
+          </div>
           <span class="glossary-count" id="glossaryCount"></span>
         </div>
 
         <!-- 테이블 -->
         <div class="glossary-table-wrap">
-          <table class="glossary-table">
+          <table class="glossary-table" id="glossaryTable">
             <thead>
               <tr>
-                <th>카테고리</th><th>한국어</th><th>영어</th><th>약어</th><th>삭제</th>
+                <th>카테고리</th><th>한국어</th><th>영어</th><th>약어</th>
+                <th class="col-relevance" id="colRelevance" style="display:none;">관련도</th>
+                <th>삭제</th>
               </tr>
             </thead>
             <tbody id="glossaryTbody"></tbody>
           </table>
+        </div>
+
+        <!-- 용어 상세 사이드패널 오버레이 -->
+        <div class="term-detail-overlay" id="termDetailOverlay"></div>
+
+        <!-- 용어 상세 사이드패널 -->
+        <div class="term-detail-panel" id="termDetailPanel">
+          <div class="term-detail-header">
+            <div>
+              <div class="term-detail-title" id="panelTermTitle">—</div>
+              <div class="term-detail-subtitle" id="panelTermSubtitle">—</div>
+            </div>
+            <button class="term-detail-close" id="termDetailClose" title="닫기">✕</button>
+          </div>
+
+          <div class="term-detail-definition">
+            <div class="term-detail-section-label">한글 정의</div>
+            <p id="panelDefinition" class="term-detail-body">—</p>
+          </div>
+
+          <div class="term-detail-meta">
+            <div class="term-meta-item">
+              <span class="term-meta-label">출처 (Source)</span>
+              <span class="term-meta-value" id="panelSource">—</span>
+            </div>
+            <div class="term-meta-item">
+              <span class="term-meta-label">카테고리</span>
+              <span class="term-meta-value" id="panelCategory">—</span>
+            </div>
+            <div class="term-meta-item">
+              <span class="term-meta-label">약어</span>
+              <span class="term-meta-value" id="panelAbbr">—</span>
+            </div>
+          </div>
+
+          <div id="panelContextWrap" style="display:none;">
+            <div class="term-detail-section-label">사용 맥락 (Context)</div>
+            <p id="panelContext" class="term-detail-body term-detail-context">—</p>
+          </div>
+
+          <div id="panelRelatedWrap" style="display:none;">
+            <div class="term-detail-section-label">관련 용어</div>
+            <div class="term-related-list" id="panelRelatedTerms"></div>
+          </div>
+
+          <div id="panelRagWrap" style="display:none;">
+            <div class="term-detail-section-label">RAG 관련도 스코어</div>
+            <div class="rag-score-bar-wrap">
+              <div class="rag-score-bar" id="panelRagBar"></div>
+            </div>
+            <span class="relevance-score" id="panelRagScore">—</span>
+          </div>
         </div>
 
         <!-- 추가 폼 -->
